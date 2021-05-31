@@ -1,0 +1,50 @@
+Create a python app that uses Selenium Python API to browse Youtube and play a given video while recording the desktop video and audio.
+The recording should be a maximum of 2 minutes.
+After the recording is done, analyze the audio and write the volume of the sound in DB in a file.
+
+
+Steps:
+    1) Configure script parameters:
+        - Youtube video link / title.
+        - Duration of the recording.
+        - Path of the saved video file.
+        - {WIP} Format of the video (if multiple formats).
+        - Path of the saved audio analysis.
+    2) !M! Browse Youtube and play a video:
+        - Use Selenium to open Mozzila Firefox browser
+        - Use Selenium to access Youtube.
+        - Use Selenium to browse Youtube:
+            * Use video title to search for video.
+            * Use Selenium to access video.
+                ~ If video does not exist, notify the user.
+        - Use Selenium to play a video from Youtube.
+    3) !M! Capture screen video recording:
+        - Use pyautogui to capture screenshots.
+        - Use numpy Convert screenshots to frames.
+        - Use opencv to save the frames as video recording.
+        - Combine video and audio in the same user specified file.
+    4) !M! Capture audio:
+        - Use pyaudio to record audio
+        - Combine video and audio in the same user specified file.
+    5) Analyze audio:
+        - {WIP} Research audio properties to be analyzed (spectrum?)
+        - Write the sound level of the audio in the file specified by user.
+
+
+SeleniumYoutubeBrowser:
+    constructor():
+        - initializes the class for browsing the web.
+    browse(URL):
+        - takes an URL and checks if it's domain is Youtube and it tries to access it.
+        - if the consent page appears, then press I agree.
+    browseYoutube(videoTitle): 
+        - 
+    browseYoutubeRandom(option):
+        - 
+    playVideo(youtubeVideo):
+        -
+ScreenVideoRecorder:
+
+ScreenAudioRecorder:
+
+AudioAnalyzer:
