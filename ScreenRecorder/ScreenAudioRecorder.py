@@ -7,7 +7,12 @@ from queue import Queue
 
 class ScreenAudioRecorderThreaded(Thread):
 
-    def __init__(self, outputDevice=None, runTime=60, loggingLevel=logging.DEBUG, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
+    frameQueue = Queue()
+    shouldStop = False
+    audioFrameCount = 0
+    lock = Lock()
+
+    def __init__(self, inputDevice=None, chunk=1024, format=pa.paInt16, channels=2, sampleRate=44100, runTime=60, loggingLevel=logging.DEBUG, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
         
         super().__init__()
 
@@ -32,24 +37,23 @@ class ScreenAudioRecorderThreaded(Thread):
         else:
             self.runTime = runTime
 
-        self.chunk = 1024
-        self.format = pa.paInt16
-        self.channels = 2
-        self.sampleRate = 44100
+        self.chunk = chunk
+        self.format = format
+        self.channels = channels
+        self.sampleRate = sampleRate
 
-        ScreenAudioRecorderThreaded.frameQueue = Queue()
-        ScreenAudioRecorderThreaded.shouldStop = False
 
         self.p = pa.PyAudio()
 
-        if outputDevice == None:
-            self.defaultOutputDeviceInfo = self.p.get_default_output_device_info()
-            self.OutputDeviceIndex = self.defaultOutputDeviceInfo["index"]
+        if inputDevice == None:
+            self.defaultInputDeviceInfo = self.p.get_default_input_device_info()
+            self.inputDeviceIndex = self.defaultInputDeviceInfo["index"]
 
-        elif self.p.get_device_info_by_index(outputDevice) is not None:
-            self.outputDevice = outputDevice
+        elif self.p.get_device_info_by_index(inputDevice) is not None:
+            self.inputDevice = inputDevice
 
-        self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, output_device_index=self.OutputDeviceIndex, frames_per_buffer=self.chunk, rate=self.sampleRate)
+        self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=self.inputDeviceIndex, frames_per_buffer=self.chunk, rate=self.sampleRate)
+        #self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=22, frames_per_buffer=self.chunk, rate=self.sampleRate)
 
         if not self.audioStream.is_active():
             self.logger.fatal("Failed to open audio stream!")
@@ -58,6 +62,11 @@ class ScreenAudioRecorderThreaded(Thread):
     def getFrameQueue(self):
 
         return ScreenAudioRecorderThreaded.frameQueue
+
+
+    def getSampleWidth(self):
+
+        return self.p.get_sample_size(self.format)
 
 
     def stop(self):
@@ -69,10 +78,14 @@ class ScreenAudioRecorderThreaded(Thread):
 
         self.logger.debug("Starting audio recording...")
 
-        for i in range(int(self.sampleRate / self.chunk * self.runTime)):
+        #for i in range(int(self.sampleRate / self.chunk * self.runTime)):
+        while ScreenAudioRecorderThreaded.audioFrameCount < int(self.sampleRate / self.chunk * self.runTime):
 
-            data = self.audioStream.read(self.chunk)
-            ScreenAudioRecorderThreaded.frameQueue.put(data)
+            with ScreenAudioRecorderThreaded.lock:
+                data = self.audioStream.read(self.chunk)
+                ScreenAudioRecorderThreaded.frameQueue.put(data)
+
+                ScreenAudioRecorderThreaded.audioFrameCount += 1
 
             if ScreenAudioRecorderThreaded.shouldStop:
                 break
