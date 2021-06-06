@@ -79,7 +79,6 @@ class ScreenVideoRecorderThreaded(Thread):
             except FileNotFoundError as f:
                 # If ctrl+c is used to stop the script, then some screenshot artifacts are left behind.
                 # I remove these in another thread, so this exception might be thrown.
-                #self.logger.debug("Screenshot already removed from disk...")
                 pass
 
             # Take screenshot and convert it to np array
@@ -94,7 +93,7 @@ class ScreenVideoRecorderThreaded(Thread):
             ScreenVideoRecorderThreaded.frameCount += 1
             # self.logger.debug(ScreenVideoRecorderThreaded.frameCount)
             if ScreenVideoRecorderThreaded.shouldStop:
-                self.logger.debug("Stopping...")
+                #self.logger.debug("Stopping...")
                 break
         
         # Remove threads from the list.
@@ -104,34 +103,34 @@ class ScreenVideoRecorderThreaded(Thread):
 
     
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
-    t = ScreenVideoRecorderThreaded(runTime=20, fps=60)
-    t.start()
+#     t = ScreenVideoRecorderThreaded(runTime=20, fps=60)
+#     t.start()
 
-    t2 = ScreenVideoRecorderThreaded(runTime=20, fps=60)
-    t2.start()
+#     t2 = ScreenVideoRecorderThreaded(runTime=20, fps=60)
+#     t2.start()
 
-    # while True:
+#     # while True:
 
-    sleep(3)
+#     sleep(3)
 
-    print("t1")
-    print(t.getFrameQueue().qsize())
-    print("t2")
-    print(t2.getFrameQueue().qsize())
+#     print("t1")
+#     print(t.getFrameQueue().qsize())
+#     print("t2")
+#     print(t2.getFrameQueue().qsize())
 
-    while not t.getFrameQueue().empty():
-        print("t1")
-        print(t.getFrameQueue().qsize())
-        print("t2")
-        print(t2.getFrameQueue().qsize())
-        frame = t.getFrameQueue().get()
-        cv2.imshow("frame", frame)
-        if cv2.waitKey(0) == ord("q"):
-            print("STOPPED!")
-            t.stop()
-            break
+#     while not t.getFrameQueue().empty():
+#         print("t1")
+#         print(t.getFrameQueue().qsize())
+#         print("t2")
+#         print(t2.getFrameQueue().qsize())
+#         frame = t.getFrameQueue().get()
+#         cv2.imshow("frame", frame)
+#         if cv2.waitKey(0) == ord("q"):
+#             print("STOPPED!")
+#             t.stop()
+#             break
 
 
 

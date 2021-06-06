@@ -6,7 +6,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementNotVisibleException
 from urllib.parse import urlparse
 import logging
-from constants import *
+from .constants import *
 
 class SeleniumYoutubeBrowser():
     def __init__(self, URL=None, maximize: bool=False, loggingLevel=logging.DEBUG):
@@ -26,6 +26,7 @@ class SeleniumYoutubeBrowser():
 
         self.logger.debug('Starting up Firefox webdriver...')
         self.browser = webdriver.Firefox()
+        # The browser takes a while to boot up.
         self.logger.debug('Firefox webdriver started!')
 
         if maximize == True:
@@ -247,7 +248,7 @@ class SeleniumYoutubeBrowser():
                 self.logger.debug("Ads skipped themselves")
                 pass
 
-        # If the pause is not found, then it means that the video is paused, so we press the play button.
+        # If the pause button is not found, then it means that the video is paused, so we press the play button.
         if not self.browser.find_elements_by_xpath(pauseButtonxpathSelector):
             self.logger.debug("Pressing the play button.")
             try:
@@ -273,9 +274,14 @@ class SeleniumYoutubeBrowser():
             self.logger.debug("Playing video: {0}".format(youtubeVideo[0]))
             self.playVideo(youtubeVideo[1])
 
-browser = SeleniumYoutubeBrowser()
 
-videos=browser.browseYoutube()
-print(videos[0])
-browser.playYoutubeVideo()
+    def quit(self):
+        
+        self.browser.quit()
+
+# browser = SeleniumYoutubeBrowser()
+
+# videos=browser.browseYoutube()
+# print(videos[0])
+# browser.playYoutubeVideo()
 

@@ -76,8 +76,6 @@ class ScreenAudioRecorderThreaded(Thread):
     
     def run(self):
 
-        self.logger.debug("Starting audio recording...")
-
         #for i in range(int(self.sampleRate / self.chunk * self.runTime)):
         while ScreenAudioRecorderThreaded.audioFrameCount < int(self.sampleRate / self.chunk * self.runTime):
 

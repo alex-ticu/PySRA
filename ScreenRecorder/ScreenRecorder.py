@@ -1,6 +1,6 @@
 from typing_extensions import runtime
-from ScreenAudioRecorder import ScreenAudioRecorderThreaded
-from ScreenVideoRecorder import ScreenVideoRecorderThreaded
+from .ScreenAudioRecorder import ScreenAudioRecorderThreaded
+from .ScreenVideoRecorder import ScreenVideoRecorderThreaded
 import logging
 from pathlib import Path
 import pyautogui
@@ -101,7 +101,7 @@ class ScreenRecorder():
         # Check if files are different.
         if self.videoSaveName == self.audioSaveName:
 
-            self.logger.warning("Video file and audio file have same names! Using default names.")
+            self.logger.warning("Video file and audio file have the same names! Using default names.")
             self.audioSaveName = "audioOutput.wav"
             self.videoSaveName = "videoOutput.avi"
             
@@ -111,7 +111,7 @@ class ScreenRecorder():
 
         else:
             self.videoThreadsN = videoThreads
-            self.logger.debug("Using {0} audio threads.".format(self.videoThreadsN))
+            self.logger.debug("Using {0} video threads.".format(self.videoThreadsN))
 
         self.fourcc = cv2.VideoWriter_fourcc(*"XVID") # same as calling with "X","V","I","D"
 
@@ -122,12 +122,15 @@ class ScreenRecorder():
         for screenshot in toRemove:
             try:
                 screenshot.unlink()
-                self.logger.debug("Removed {0}".format(screenshot))
+                #self.logger.debug("Removed {0}".format(screenshot))
             except:
-                self.logger.exception("Failed to remove {0}".format(screenshot))
+                #self.logger.exception("Failed to remove {0}".format(screenshot))
+                pass
 
 
     def recordVideo(self, path):
+
+        self.logger.debug("!!!")
 
         # Initialize video writer. The video file will be numFrames / fps seconds long, but the frames are not synced on the time axis, so the video will be either slowed down or speed up.
         writer = cv2.VideoWriter(str(path), self.fourcc, self.fps, self.screenSize)
@@ -149,9 +152,6 @@ class ScreenRecorder():
                 # If the threads stopped sending frames.
                 self.logger.error("Can't receive video frames!")
                 break
-            
-            #self.logger.debug(frame)
-            
 
             writer.write(frame)
             frameQueue.task_done()
@@ -242,19 +242,30 @@ class ScreenRecorder():
                 self.logger.error("Cannot remove {} (Permission denied)".format(audioPath))
                 return
 
+        # Need to sync the starting of audio and video recording.
+        # Audio recording takes longer to initialize due to the AudioPort initialization.
+
         self.logger.debug("Starting recording video: {0}".format(videoPath))
 
-        # videoWorker = Thread(target=self.recordVideo(videoPath))
-        # videoWorker.daemon = True
-        # videoWorker.start()
+        videoWorker = Thread(target=self.recordVideo, args=(videoPath,))
+        videoWorker.daemon = True
+        videoWorker.start()
 
         self.logger.debug("Starting recording audio: {0}".format(audioPath))
 
-        audioWorker = Thread(target=self.recordAudio(audioPath))
+        audioWorker = Thread(target=self.recordAudio, args=(audioPath, ))
         audioWorker.daemon = True
         audioWorker.start()
 
+        # Wait for video recording.
+        videoWorker.join()
+        self.logger.debug("Video recording ended.")
+
+        # # Wait for audio recording.
+        audioWorker.join()
+        self.logger.debug("Audio recording ended.")
 
 
-rec = ScreenRecorder(videoSavePath="asdf/video.avi", audioSavePath="asdf/audio.avi", runTime=20, fps=20)
-rec.record()
+
+# rec = ScreenRecorder(videoSavePath="asdf/video.avi", audioSavePath="asdf/audio.avi" , runTime=20, fps=20)
+# rec.record()
