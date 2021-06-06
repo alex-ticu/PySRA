@@ -232,7 +232,7 @@ class ScreenRecorder():
 
     def record(self):
 
-        # Create video directory if doesn't exist.
+        # Create video directory if it doesn't exist.
         if not self.videoSavePath.is_dir():
             self.logger.debug("Creating {0}/".format(str(self.videoSavePath)))
             try:
@@ -250,7 +250,7 @@ class ScreenRecorder():
                 self.logger.error("Cannot remove {} (Permission denied)".format(videoPath))
                 return
 
-        # Create audio directory if doesn't exist.
+        # Create audio directory if it doesn't exist.
         if not self.audioSavePath.is_dir():
             self.logger.debug("Creating {0}/".format(str(self.audioSavePath)))
             try:
@@ -268,14 +268,14 @@ class ScreenRecorder():
                 self.logger.error("Cannot remove {} (Permission denied)".format(audioPath))
                 return
 
-        # Need to sync the starting of audio and video recording.
+        # TODO: Need to sync the starting of audio and video recording.
         # Audio recording takes longer to initialize due to the AudioPort initialization.
 
-        # self.logger.debug("Starting recording video: {0}".format(videoPath))
+        self.logger.debug("Starting recording video: {0}".format(videoPath))
 
-        # videoWorker = Thread(target=self.recordVideo, args=(videoPath,))
-        # videoWorker.daemon = True
-        # videoWorker.start()
+        videoWorker = Thread(target=self.recordVideo, args=(videoPath,))
+        videoWorker.daemon = True
+        videoWorker.start()
 
         self.logger.debug("Starting recording audio: {0}".format(audioPath))
 
@@ -284,7 +284,7 @@ class ScreenRecorder():
         audioWorker.start()
 
         # Wait for video recording.
-        #videoWorker.join()
+        videoWorker.join()
         self.logger.debug("Video recording ended.")
 
         # # Wait for audio recording.

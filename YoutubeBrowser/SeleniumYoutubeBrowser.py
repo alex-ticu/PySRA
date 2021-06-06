@@ -45,13 +45,14 @@ class SeleniumYoutubeBrowser():
         # Check if domain Youtube primary domain, but only after prefix (eg: www. ~youtube.com~).
         if parsedURL.netloc.split(sep='.', maxsplit=1)[1] not in YOUTUBE_DOMAINS:
             self.logger.error(str(parsedURL.netloc) + ' is not a Youtube domain!')
+            self.browse('https://www.youtube.com/')
 
         else:
             # TODO: Implement functionality for other Youtube domains.
             # Check if it is www.youtube.com or youtu.be (for sharable links) or m.youtube.com (for mobile).
-            if parsedURL.netloc != 'www.youtube.com' and parsedURL.netloc != 'youtu.be' and parsedURL.netloc != 'm.youtube.com':
+            if parsedURL.netloc not in SUPPORTED_YOUTUBE_DOMAINS:
                 self.logger.error(str(parsedURL.netloc) + ' is not a supported Youtube domain!')
-
+                self.browse('https://www.youtube.com/')
             else:
                 # Check if URL scheme is https.
                 if parsedURL.scheme != 'https' and parsedURL.scheme != 'http':
@@ -63,23 +64,52 @@ class SeleniumYoutubeBrowser():
                         self.logger.warning('http scheme found. Replacing to https!')
                         parsedURL._replace(scheme='https')
 
-                    self.browser.get(URL)
+                    try:
+                        self.browser.get(URL)
+                    except Exception as e:
+                        self.logger.error("Failed to browse {0}".format(URL))
+                        self.logger.exception(e)
+                        return
+                    
                     self.logger.debug('Browsing ' + str(URL))
 
                     # Check if the consent page appeared.
                     if urlparse(self.browser.current_url).netloc == 'consent.youtube.com':
                         self.logger.warning('Consent page detected. Pressing "I agree" and continuing...')
 
-                        xpathSelector = "//button[@aria-label='" + AGREE_BUTTON_ARIA_LABEL + "']"
+                        xpathSelector = "//button[@class='" + AGREE_BUTTON_CLASS + "']"
 
-                        self.browser.find_element_by_xpath(xpathSelector).click()
+                        try:
+                            self.browser.find_element_by_xpath(xpathSelector).click()
+
+                        except Exception as e:
+                            self.logger.error("Failed to click 'I agree' button.")
+                            self.logger.exception(e)
+                            return
+
+                    elif self.isOnYoutube():
+                        # Paper buttons for consent randomly appear if the consent page didn't.
+                        # The "I agree" button has no discerning tag to search for except for the aria-label. If the language is not english, then this will fail.
+                        xpathSelector = "//tp-yt-paper-button[@aria-label='" + AGREE_PAPER_BUTTON_ARIA_LABEL + "']"
+
+                        try:
+                            self.browser.find_element_by_xpath(xpathSelector).click()
+
+                        except Exception as e:
+                            self.logger.error("Failed to click 'I agree' button.")
+                            self.logger.exception(e)
+                            return
 
 
     def isOnYoutube(self):
         # Check if the current page is a Youtube page
 
-        parsedURL = urlparse(self.browser.current_url).netloc.split(sep='.', maxsplit=1)
-        if parsedURL[1] == 'youtube.com' and parsedURL[0] != 'consent':
+        if self.browser.current_url == "about:blank":
+            self.logger.error("URL address bar is empty!")
+            return False
+
+        parsedURL = urlparse(self.browser.current_url).netloc.split(sep='.', maxsplit=2)
+        if parsedURL[1] == 'youtube' and parsedURL[0] != 'consent':
             # If it is not the consent page, then we're on Youtube.
                 return True
 
@@ -136,7 +166,7 @@ class SeleniumYoutubeBrowser():
         searchBox = self.findYoutubeSearchBox()
         searchBoxButton = self.findYoutubeSearchBoxButton()
         if searchBox is None or searchBoxButton is None:
-            self.logger.error("Youtube searchbox cannot be found!")
+            return
         
         else:
             # send_keys is defined in selenium/remote/webelement.py
@@ -226,7 +256,12 @@ class SeleniumYoutubeBrowser():
         # TODO: Try to skip adds :( - Done. (Needs more testing?)
         # Plays video
 
-        self.browser.get(videoLink)
+        try:
+            self.browser.get(videoLink)
+        except Exception as e:
+            self.logger.error("Failed to browse {0}".format(videoLink))
+            self.logger.exception(e)
+            return
         
         skipAdsxpathSelector = "//button[@class='" + VIDEO_PLAYER_SKIP_ADDS_BUTTON_CLASS + "']"
         adsxpathSelector = "//div[@class='" + VIDEO_ADS_CLASS + "']"

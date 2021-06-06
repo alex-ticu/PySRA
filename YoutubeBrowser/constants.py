@@ -11,8 +11,17 @@ YOUTUBE_DOMAINS = [
     "yt3.ggpht.com",
     "ytimg.com",
 ]
+
+SUPPORTED_YOUTUBE_DOMAINS = [
+    "www.youtube.com",
+    "youtu.be",
+    "m.youtube.com"
+]
+
 # Consent page
-AGREE_BUTTON_ARIA_LABEL = 'Agree to the use of cookies and other data for the purposes described'
+AGREE_BUTTON_CLASS= 'VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc IIdkle'
+# tp-yt-paper-button id="button" class="style-scope ytd-button-renderer style-primary size-default" role="button" tabindex="0" animated="" elevation="0" aria-disabled="false" aria-label="Agree to the use of cookies and other data for the purposes described"><!--css-build:shady--><yt-formatted-string id="text" class="style-scope ytd-button-renderer style-primary size-default">I Agree</yt-formatted-string><paper-ripple class="style-scope tp-yt-paper-button">
+AGREE_PAPER_BUTTON_ARIA_LABEL = "Agree to the use of cookies and other data for the purposes described" # This randomly shows on the front page and it has no discerning ID.
 
 
 # Searchbox and searchbox button

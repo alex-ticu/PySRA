@@ -78,7 +78,7 @@ class ScreenVideoRecorderThreaded(Thread):
                 screenShot = pyautogui.screenshot()
             except FileNotFoundError as f:
                 # If ctrl+c is used to stop the script, then some screenshot artifacts are left behind.
-                # I remove these in another thread, so this exception might be thrown.
+                # I remove these in another thread, so this exception might be thrown (if no ctrl+c is given).
                 pass
 
             # Take screenshot and convert it to np array
