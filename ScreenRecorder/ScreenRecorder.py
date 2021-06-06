@@ -10,6 +10,9 @@ from time import time
 import queue
 import wave
 import pyaudio as pa
+import numpy as np
+import struct
+import sys
 
 
 class ScreenRecorder():
@@ -167,7 +170,26 @@ class ScreenRecorder():
         self.removeScreenshots()
 
 
+    def analyzeAudio(self, frame):
+
+        # Frame is a number of bytes numbers of bytes.
+        # Two channels.
+        count = len(frame)/2
+        # $d - signed integer (count) "h" stands for short integer in format.
+        # (count) number of shorts.
+        format = "%dh"%(count)
+        # get short values.
+        shorts = struct.unpack(format, frame)
+        #frame = int.from_bytes(frame, byteorder=sys.byteorder, signed=False)
+
+        db = 20*np.log10(np.sqrt(np.mean(np.absolute(shorts)**2)))
+
+        return db
+
+
     def recordAudio(self, path):
+
+        analyzerFile = open(str(path.parent / "analyzer.txt"), "w")
 
         # One thread is enough for audio recording.
         worker = ScreenAudioRecorderThreaded(runTime=self.runTime)
@@ -190,6 +212,10 @@ class ScreenRecorder():
                 # If the threads stopped sending frames.
                 self.logger.error("Can't receive audio frames!")
                 break
+            
+            #self.logger.debug(frame)
+            db = self.analyzeAudio(frame)
+            analyzerFile.write(str(db) + "\n")
 
             frames.append(frame)
             frameQueue.task_done()
@@ -245,11 +271,11 @@ class ScreenRecorder():
         # Need to sync the starting of audio and video recording.
         # Audio recording takes longer to initialize due to the AudioPort initialization.
 
-        self.logger.debug("Starting recording video: {0}".format(videoPath))
+        # self.logger.debug("Starting recording video: {0}".format(videoPath))
 
-        videoWorker = Thread(target=self.recordVideo, args=(videoPath,))
-        videoWorker.daemon = True
-        videoWorker.start()
+        # videoWorker = Thread(target=self.recordVideo, args=(videoPath,))
+        # videoWorker.daemon = True
+        # videoWorker.start()
 
         self.logger.debug("Starting recording audio: {0}".format(audioPath))
 
@@ -258,7 +284,7 @@ class ScreenRecorder():
         audioWorker.start()
 
         # Wait for video recording.
-        videoWorker.join()
+        #videoWorker.join()
         self.logger.debug("Video recording ended.")
 
         # # Wait for audio recording.
