@@ -46,13 +46,23 @@ class ScreenAudioRecorderThreaded(Thread):
         self.p = pa.PyAudio()
 
         if inputDevice == None:
-            self.defaultInputDeviceInfo = self.p.get_default_input_device_info()
-            self.inputDeviceIndex = self.defaultInputDeviceInfo["index"]
+            try:
+                self.defaultInputDeviceInfo = self.p.get_default_input_device_info()
+                self.inputDeviceIndex = self.defaultInputDeviceInfo["index"]
+            
+            except:
+                # Can't get a default input device.
+                self.inputDevice = None
 
         elif self.p.get_device_info_by_index(inputDevice) is not None:
             self.inputDevice = inputDevice
 
-        self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=self.inputDeviceIndex, frames_per_buffer=self.chunk, rate=self.sampleRate)
+        if self.inputDevice is not None:
+            self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=self.inputDeviceIndex, frames_per_buffer=self.chunk, rate=self.sampleRate)
+        
+        else:
+            self.logger.error("No input device! Won't record audio.")
+            return
         #self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=22, frames_per_buffer=self.chunk, rate=self.sampleRate)
 
         if not self.audioStream.is_active():
@@ -76,7 +86,9 @@ class ScreenAudioRecorderThreaded(Thread):
     
     def run(self):
 
-        #for i in range(int(self.sampleRate / self.chunk * self.runTime)):
+        if self.inputDevice is None:
+            return
+
         while ScreenAudioRecorderThreaded.audioFrameCount < int(self.sampleRate / self.chunk * self.runTime):
 
             with ScreenAudioRecorderThreaded.lock:

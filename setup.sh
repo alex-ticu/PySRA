@@ -14,6 +14,9 @@ else
 	sudo apt install python3
 fi
 
+# python3-tk used for selenium API; scrot used for screenshot functionality.
+sudo apt-get install python3-tk python3-dev scrot
+
 pip3Path=$(which pip3)
 
 if [ $? -eq 0 ]
@@ -21,7 +24,7 @@ then
 	echo "Pip3 installed at ${pip3Path}"
 else
 	echo "Installing pip3"
-	sudo apt install python3-pip
+	sudo apt-get install python3-pip
 fi
 
 # portaudio.h is needed to install pyaudio
@@ -40,7 +43,8 @@ then
 	echo "virtualenv installed at ${virtualEnv}"
 else
 	echo "Installing virtualenv"
-	pip3 install virtualenv
+	# Install in /usr/bin
+	sudo pip3 install virtualenv
 fi
 
 virtualenv ${virtualEnvPath}

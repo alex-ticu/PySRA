@@ -176,7 +176,11 @@ class ScreenRecorder():
         shorts = struct.unpack(format, frame)
         #frame = int.from_bytes(frame, byteorder=sys.byteorder, signed=False)
 
-        db = 20*np.log10(np.sqrt(np.mean(np.absolute(shorts)**2)))
+        # Since log(0) is -inf, convert all 0s from shorts to ones. log(1) = 0
+        shorts = np.array(shorts)
+        shortsNoZeros = np.where(shorts == 0, 1, shorts)
+
+        db = 20*np.log10(np.sqrt(np.mean(np.absolute(shortsNoZeros)**2)))
 
         return db
 
