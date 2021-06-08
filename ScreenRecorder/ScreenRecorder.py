@@ -166,6 +166,9 @@ class ScreenRecorder():
 
     def analyzeAudio(self, frame):
 
+        if len(frame) == 0:
+            return 0
+
         # Frame is a number of bytes numbers of bytes.
         # Two channels.
         count = len(frame)/2

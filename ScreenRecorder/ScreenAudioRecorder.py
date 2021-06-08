@@ -54,10 +54,10 @@ class ScreenAudioRecorderThreaded(Thread):
                 # Can't get a default input device.
                 self.inputDevice = None
 
-        elif self.p.get_device_info_by_index(inputDevice) is not None:
-            self.inputDevice = inputDevice
+        else:
+            self.inputDeviceIndex = inputDevice
 
-        if self.inputDevice is not None:
+        if self.inputDeviceIndex is not None:
             self.audioStream = self.p.open(channels=self.channels, format=self.format, input=True, input_device_index=self.inputDeviceIndex, frames_per_buffer=self.chunk, rate=self.sampleRate)
         
         else:
@@ -86,13 +86,16 @@ class ScreenAudioRecorderThreaded(Thread):
     
     def run(self):
 
-        if self.inputDevice is None:
-            return
 
         while ScreenAudioRecorderThreaded.audioFrameCount < int(self.sampleRate / self.chunk * self.runTime):
 
             with ScreenAudioRecorderThreaded.lock:
-                data = self.audioStream.read(self.chunk)
+                if self.inputDeviceIndex is None:
+                    data = ()
+                
+                else:
+                    data = self.audioStream.read(self.chunk)
+
                 ScreenAudioRecorderThreaded.frameQueue.put(data)
 
                 ScreenAudioRecorderThreaded.audioFrameCount += 1
