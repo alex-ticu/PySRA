@@ -33,9 +33,6 @@ else
 	#sudo apt-get install portaudio19-dev
 fi;
 
-virtualenv ${virtualEnvPath}
-source ${virtualEnvPath}/bin/activate
-
 echo 'Installing python3 required packages...'
 
 pip3 install -r requirements.txt
@@ -45,6 +42,9 @@ then
 	echo "Could not install packages..."
 	exit 1
 fi
+
+virtualenv ${virtualEnvPath}
+source ${virtualEnvPath}/bin/activate
 
 echo 'Installing geckodriver...'
 

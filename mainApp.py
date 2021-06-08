@@ -11,7 +11,7 @@ searchParam = "northernlion"
 # Recording parameters.
 videoPath = "./recording/video.avi"
 audioPath = "./recording/audio.wav"
-runTime = 60
+runTime = 30
 fps = 20
 
 recordThreadArgs = (videoPath, audioPath, runTime, fps)

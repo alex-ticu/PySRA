@@ -17,7 +17,7 @@ import sys
 
 class ScreenRecorder():
 
-    def __init__(self, videoSavePath, audioSavePath, runTime=60, fps=20, quitKey='q', videoThreads=4, outputDevice=None, loggingLevel=logging.DEBUG, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
+    def __init__(self, videoSavePath, audioSavePath, runTime=60, fps=20, quitKey='q', videoThreads=8, outputDevice=None, loggingLevel=logging.DEBUG, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):
 
         # Init logging
         self.logger = logging.getLogger('ScreenRecorder')
@@ -62,8 +62,6 @@ class ScreenRecorder():
         else:
             self.runTime = runTime
 
-        self.logger.debug(Path(videoSavePath).suffix)
-
         # Path for video file
         if not Path(videoSavePath).suffixes:
             # No file name was given...
@@ -96,7 +94,6 @@ class ScreenRecorder():
         
         else:
             # Default.
-            self.logger.warning("No audio file path given. Defaulting to current directory")
             self.audioSavePath = Path(audioSavePath).parent
             self.audioSaveName = Path(audioSavePath).name
         self.logger.warning("Saving audio to: {0}/{1}".format(str(self.audioSavePath), self.audioSaveName))
@@ -133,11 +130,8 @@ class ScreenRecorder():
 
     def recordVideo(self, path):
 
-        self.logger.debug("!!!")
-
         # Initialize video writer. The video file will be numFrames / fps seconds long, but the frames are not synced on the time axis, so the video will be either slowed down or speed up.
         writer = cv2.VideoWriter(str(path), self.fourcc, self.fps, self.screenSize)
-        # self.videoRecorderThread.start()
 
         for i in range(self.videoThreadsN):
             worker = ScreenVideoRecorderThreaded(runTime=self.runTime, fps=self.fps, loggingLevel=logging.DEBUG)
@@ -213,7 +207,6 @@ class ScreenRecorder():
                 self.logger.error("Can't receive audio frames!")
                 break
             
-            #self.logger.debug(frame)
             db = self.analyzeAudio(frame)
             analyzerFile.write(str(db) + "\n")
 

@@ -73,12 +73,16 @@ class ScreenVideoRecorderThreaded(Thread):
         while ScreenVideoRecorderThreaded.frameCount <= (self.runTime * self.fps - len(ScreenVideoRecorderThreaded.workingThreads)):
 
             # Threads wait for eachother when taking screenshots?
-            #with ScreenVideoRecorderThreaded.lock:
+            # Jitter will be visible in the recorded video.
+            # This is caused by the threads running. Some finish taking screenshots before earlier threads.
+            # A multithreaded screenshot() method might be more beneficial as it is the bottleneck.
+
+            #with ScreenVideoRecorderThreaded.lock: # This doesn't work because screenshot() is a bottleneck
             try:
                 screenShot = pyautogui.screenshot()
             except FileNotFoundError as f:
-                # If ctrl+c is used to stop the script, then some screenshot artifacts are left behind.
-                # I remove these in another thread, so this exception might be thrown (if no ctrl+c is given).
+                    # If ctrl+c is used to stop the script, then some screenshot artifacts are left behind.
+                    # I remove these in another thread, so this exception might be thrown (if no ctrl+c is given).
                 pass
 
             # Take screenshot and convert it to np array
@@ -93,7 +97,7 @@ class ScreenVideoRecorderThreaded(Thread):
             ScreenVideoRecorderThreaded.frameCount += 1
             # self.logger.debug(ScreenVideoRecorderThreaded.frameCount)
             if ScreenVideoRecorderThreaded.shouldStop:
-                #self.logger.debug("Stopping...")
+                    #self.logger.debug("Stopping...")
                 break
         
         # Remove threads from the list.
