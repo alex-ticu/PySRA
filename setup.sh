@@ -30,7 +30,7 @@ then
 	echo "portaudio.h found"
 else
 	echo "poraudio.h not found... Installing portaudio"
-	#sudo apt-get install portaudio19-dev
+	sudo apt-get install portaudio19-dev
 fi;
 
 echo 'Installing python3 required packages...'
