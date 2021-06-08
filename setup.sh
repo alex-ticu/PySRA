@@ -12,7 +12,7 @@ then
 else
 	echo "Installing python3..."
 	sudo apt install python3
-fi;
+fi
 
 pip3Path=$(which pip3)
 
@@ -22,7 +22,7 @@ then
 else
 	echo "Installing pip3"
 	sudo apt install python3-pip
-fi;
+fi
 
 # portaudio.h is needed to install pyaudio
 if [[ -e /usr/local/include/portaudio.h ]] || [[ -e /usr/include/portaudio.h ]]
@@ -31,7 +31,20 @@ then
 else
 	echo "poraudio.h not found... Installing portaudio"
 	sudo apt-get install portaudio19-dev
-fi;
+fi
+
+virtualEnv=$(which virtualenv)
+
+if [ $? -eq 0 ]
+then
+	echo "virtualenv installed at ${virtualEnv}"
+else
+	echo "Installing virtualenv"
+	pip3 install virtualenv
+fi
+
+virtualenv ${virtualEnvPath}
+source ${virtualEnvPath}/bin/activate
 
 echo 'Installing python3 required packages...'
 
@@ -42,9 +55,6 @@ then
 	echo "Could not install packages..."
 	exit 1
 fi
-
-virtualenv ${virtualEnvPath}
-source ${virtualEnvPath}/bin/activate
 
 echo 'Installing geckodriver...'
 
